@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#
+# This script is invoked by [`bin/compile`](/).
+
+# Syntax sugar.
+source $BIN_DIR/utils
+
+PREV_DIR=$(pwd)
+cd $CACHE_DIR
+
+if [ ! -d "libsodium-0.4.2" ]; then
+    echo "-----> No existing libsodium-0.4.2 directory; compiling from source"
+    tar xzf $BIN_DIR/steps/libsodium-0.4.2.tar.gz 2>&1 | indent
+    cd libsodium-0.4.2
+    echo "-----> Configuring libsodium"
+    ./configure --prefix=$BUILD_DIR/libsodium-0.4.2 2>&1 | indent
+    echo "-----> Compiling libsodium"
+    make 2>&1 | indent
+    make install 2>&1 | indent
+else
+    echo "-----> Installing libsodium from precompiled cached source tree"
+    cd libsodium-0.4.2
+    make install 2>&1 | indent
+fi
+
+export LD_LIBRARY_PATH=$BUILD_DIR/libsodium-0.4.2/lib
+
+cd "$PREV_DIR"
